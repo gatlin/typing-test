@@ -19,6 +19,7 @@ type AppState = {
     current_word: number; // index into the upcoming words (current line)
     words_box_width: number; // width of the words box (computed)
     char_width: number; // width of a character (computed)
+    words_typed: number;
 };
 
 enum Actions {
@@ -33,7 +34,6 @@ type Action = {
 }
 
 function generate_line(box_width, char_width) {
-    console.log('box width', box_width);
     const uw = [];
     let current_width = 0;
     let done: boolean = false;
@@ -58,7 +58,8 @@ function empty_model(): AppState {
         upcoming_words: [],
         current_word: 0,
         words_box_width: 0,
-        char_width: 0
+        char_width: 0,
+        words_typed: 0
     };
 }
 
@@ -68,13 +69,10 @@ function update_model(action: Action, model: AppState): AppState {
     // once the words box is rendered we can calculate the geometry for the
     // scroll box
     dispatch[Actions.Init] = () => {
-        console.log('CALLING INIT');
         if (!model.initialized) {
             model.words_box_width = action.data.offsetWidth;
             model.char_width = document.getElementById('current-word').offsetWidth /
                 3;
-            console.log('[update] box width', model.words_box_width);
-            console.log('[update] char width', model.char_width);
             model.upcoming_words = generate_line(model.words_box_width,
                 model.char_width);
             model.initialized = true;
@@ -92,7 +90,6 @@ function update_model(action: Action, model: AppState): AppState {
             // generate a new word, push the old word into the history
 
             model.current_word++;
-            console.log('current word =', model.current_word);
 
             if (model.current_word >= model.upcoming_words.length) {
                 model.upcoming_words = generate_line(
@@ -103,11 +100,22 @@ function update_model(action: Action, model: AppState): AppState {
                 console.log('new line', model.upcoming_words);
             }
             model.typed_so_far = '';
+            model.words_typed++;
         }
         return model;
     };
 
     dispatch[Actions.KeyDown] = () => {
+        if (8 === action.data &&
+            model.words_typed &&
+            '' === model.typed_so_far) {
+            model.current_word--;
+            if (model.current_word < 0) {
+                model.current_word = 0;
+            } else {
+                model.words_typed--;
+            }
+        }
         return model;
     };
 
