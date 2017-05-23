@@ -1,0 +1,32 @@
+div#typing-app {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #b9b9b9;
+}
+
+div#words-box {
+    margin: 0 auto;
+    text-align: center;
+    font-size: 120%;
+    font-family: monospace;
+    width: 50%;
+    padding: 0;
+    }
+
+div#input-wrapper {
+    text-align: center;
+    margin: 0 auto;
+}
+
+input#typing-input {
+    margin: 0 auto;
+    text-align: center;
+    }
+
+span.word:after {
+    content: " ";
+}
+
+span.word#current-word {
+    color: red;
+    }
