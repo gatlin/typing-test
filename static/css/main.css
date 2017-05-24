@@ -17,6 +17,9 @@ div#words-box {
 div#input-wrapper {
     text-align: center;
     margin: 0 auto;
+    padding: 5px;
+    font-size: 1.5em;
+    font-family: monospace;
 }
 
 input#typing-input {
