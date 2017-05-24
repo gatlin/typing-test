@@ -5,6 +5,7 @@ import { random_word } from './words';
 // backspace: 8
 
 const words_box_mbox = new Mailbox(null);
+const timer_mbox = new Mailbox(false);
 
 type Word = {
     expected: string;
@@ -21,12 +22,16 @@ type AppState = {
     words_box_width: number; // width of the words box (computed)
     char_width: number; // width of a character (computed)
     words_typed: number;
+    active: boolean;
+    finished: boolean;
+    cpm: number;
 };
 
 enum Actions {
     Init,
     UpdateInput,
-    KeyDown
+    KeyDown,
+    Stop
 };
 
 type Action = {
@@ -64,8 +69,16 @@ function empty_model(): AppState {
         current_line: 0,
         words_box_width: 0,
         char_width: 0,
-        words_typed: 0
+        words_typed: 0,
+        active: false,
+        finished: false,
+        cpm: 0
     };
+}
+
+// for readability later
+function flatten_array<T>(ary: Array<Array<T>>): Array<T> {
+    return ary.reduce((a, b) => a.concat(b), []);
 }
 
 function update_model(action: Action, model: AppState): AppState {
@@ -76,8 +89,8 @@ function update_model(action: Action, model: AppState): AppState {
     dispatch[Actions.Init] = () => {
         if (!model.initialized) {
             model.words_box_width = action.data.offsetWidth;
-            model.char_width = document.getElementById('current-word').offsetWidth /
-                3;
+            model.char_width =
+                document.getElementById('current-word').offsetWidth / 3;
             for (let i = 0; i < 3; i++) {
                 let line = generate_line(
                     model.words_box_width,
@@ -92,6 +105,11 @@ function update_model(action: Action, model: AppState): AppState {
 
     // the user typed something
     dispatch[Actions.UpdateInput] = () => {
+        if (!model.active && !model.finished) {
+            model.active = true;
+            timer_mbox.send(true);
+        }
+
         model.typed_so_far = action.data;
         // did they hit the space bar?
         const split_input = model.typed_so_far.split(' ');
@@ -117,6 +135,7 @@ function update_model(action: Action, model: AppState): AppState {
                 model.current_word = 0;
                 model.current_line++;
             }
+
             model.typed_so_far = '';
             model.words_typed++;
         }
@@ -146,9 +165,28 @@ function update_model(action: Action, model: AppState): AppState {
         return model;
     };
 
+    dispatch[Actions.Stop] = () => {
+        if (model.active) {
+            model.active = false;
+            model.finished = true;
+
+            // calculate a score
+            const words: Array<Word> = flatten_array(model.lines)
+                .slice(0, model.words_typed)
+                .filter(word => !word.incorrect);
+
+            model.cpm = 0; // double tap
+            for (let i = 0; i < words.length; i++) {
+                model.cpm += words[i].expected.length;
+            }
+        }
+        return model;
+    };
+
     return dispatch[action.type]();
 }
 
+// logic for taking an array of `Word`s and rendering as a single line
 function render_line(line, current_word = null) {
     const line_spans: Array<any> = line.map(
         (uw, idx) => {
@@ -199,11 +237,11 @@ function render_model(model) {
             'id': 'current-word'
         }, ['foo']));
     }
-    return el('div', { 'id': 'typing-app' }, [
-        el('div', { 'id': 'words-box-outer' }, [
-            el('div', { 'id': 'words-box' }, words_line)
-                .subscribe(words_box_mbox)]),
-        el('div', { 'id': 'input-wrapper' }, [
+
+    let below_box;
+
+    if (!model.finished) {
+        below_box = el('div', { 'id': 'below-box' }, [
             el('input', {
                 'type': 'text',
                 'id': 'typing-input',
@@ -211,7 +249,22 @@ function render_model(model) {
                 'value': model.typed_so_far
             }, [])
         ])
+    } else {
+        below_box = el('div', { 'id': 'below-box', 'class': 'fade-in' }, [
+            el('h2', { 'id': 'score' }, [
+                'You typed ' + model.cpm + ' characters per minute!'
+            ]),
+            el('p', {}, ['Refresh to try again, maybe after a two minute break.'])
+        ]);
+    }
+
+    return el('div', { 'id': 'typing-app' }, [
+        el('div', { 'id': 'words-box-outer' }, [
+            el('div', { 'id': 'words-box' }, words_line)
+                .subscribe(words_box_mbox)]),
+        below_box
     ]);
+
 }
 
 function main(scope) {
@@ -238,6 +291,14 @@ function main(scope) {
             data: elem
         }))
         .connect(scope.actions);
+
+    timer_mbox
+        .filter(msg => msg === true)
+        .recv(_ => {
+            window.setTimeout(() => {
+                scope.actions.send({ type: Actions.Stop });
+            }, 60000);
+        });
 }
 
 const app = new App({
