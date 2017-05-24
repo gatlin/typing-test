@@ -6,16 +6,15 @@ import * as words from './words';
 
 const words_box_mbox = new Mailbox(null);
 
-type WordResult = {
+type Word = {
     expected: string;
     actual: string;
-    correct_chars: number;
-}
+};
 
 type AppState = {
     initialized: boolean;
     typed_so_far: string;
-    lines: Array<Array<string>>;
+    lines: Array<Array<Word>>;
     current_word: number; // index into the upcoming words (current line)
     current_line: number;
     words_box_width: number; // width of the words box (computed)
@@ -45,7 +44,10 @@ function generate_line(box_width, char_width) {
             done = true;
             break;
         } else {
-            uw.push(word);
+            uw.push({
+                expected: word,
+                actual: ''
+            });
         }
     }
     return uw;
@@ -87,6 +89,7 @@ function update_model(action: Action, model: AppState): AppState {
         return model;
     };
 
+    // the user typed something
     dispatch[Actions.UpdateInput] = () => {
         model.typed_so_far = action.data;
         // did they hit the space bar?
@@ -95,7 +98,9 @@ function update_model(action: Action, model: AppState): AppState {
 
         if (space_pressed) {
             // generate a new word, push the old word into the history
-
+            const current_word =
+                model.lines[model.current_line][model.current_word];
+            current_word.actual = model.typed_so_far.replace(/\s+$/, '');
             model.current_word++;
 
             if (model.current_word >= model.lines[model.current_line].length) {
@@ -113,16 +118,24 @@ function update_model(action: Action, model: AppState): AppState {
         return model;
     };
 
+    // check if backspace was pressed with empty input
     dispatch[Actions.KeyDown] = () => {
-        if (8 === action.data &&
-            model.words_typed &&
-            '' === model.typed_so_far) {
+        let go_back_a_word =
+            8 === action.data && // backspace
+            '' === model.typed_so_far && // nothing typed yet
+            model.words_typed > 0; // we have something to go back to
+        if (go_back_a_word) {
             model.current_word--;
-            if (model.current_word < 0) {
-                model.current_word = 0;
-            } else {
-                model.words_typed--;
+            model.words_typed--;
+
+            // if we're trying to back up to a previous line
+            if (model.current_word < 0 && model.current_line > 0) {
+                model.current_line--;
+                let line = model.lines[model.current_line];
+                model.current_word = line.length - 1;
             }
+            model.typed_so_far =
+                model.lines[model.current_line][model.current_word].actual;
         }
         return model;
     };
@@ -131,14 +144,16 @@ function update_model(action: Action, model: AppState): AppState {
 }
 
 function render_line(line, current_word = null) {
-
     const line_spans: Array<any> = line.map(
         (uw, idx) => {
-            let attrs = { 'class': 'word', 'key': 'word-' + uw };
+            let attrs = {
+                'class': 'word',
+                'id': 'word-' + uw.expected
+            };
             if (idx !== null && idx === current_word) {
-                attrs['id'] = 'current-word';
+                attrs['class'] = attrs['class'] + ' current-word';
             }
-            return el('span', attrs, [uw]);
+            return el('span', attrs, [uw.expected]);
         });
 
     return line_spans;
@@ -164,8 +179,7 @@ function render_model(model) {
                     : null
             );
             words_line.push(el('div', {
-                'class': 'line',
-                'id': 'line-' + i.toString()
+                'class': 'line'
             }, rendered_line));
         }
     } else {

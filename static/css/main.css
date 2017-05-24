@@ -31,6 +31,6 @@ span.word:after {
     content: " ";
 }
 
-span.word#current-word {
+span.word.current-word {
     font-weight: bold;
     }
