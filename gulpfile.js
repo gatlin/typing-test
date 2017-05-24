@@ -82,6 +82,7 @@ gulp.task('serve', serve({
             var endpoint = req.url.slice(5);
             res.statusCode = 302;
             res.setHeader('Location', '/static' + endpoint);
+            res.end();
         }
         next();
     }
