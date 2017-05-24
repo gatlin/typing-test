@@ -3,15 +3,21 @@ div#typing-app {
     margin: 0 auto;
 }
 
-div#words-box {
+div#words-box-outer {
     margin: 25px auto;
+    padding: 0 10px;
+    border: 1px solid #b9b9b9;
+    width: 50%;
+    }
+
+div#words-box {
+    margin: 0;
     text-align: center;
     font-size: 2.0em;
     font-family: monospace;
-    width: 50%;
+    width: 100%;
     padding: 0;
-    line-height: 80px;
-    border: 1px solid #b9b9b9;
+    line-height: 3.0em;
     }
 
 div#input-wrapper {
@@ -25,6 +31,11 @@ div#input-wrapper {
 input#typing-input {
     margin: 0 auto;
     text-align: center;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 1px solid #b9b9b9;
+    height: 2.0em;
     }
 
 span.word:after {
@@ -33,4 +44,8 @@ span.word:after {
 
 span.word.current-word {
     font-weight: bold;
+    }
+
+span.word.incorrect {
+    color: red;
     }

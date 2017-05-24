@@ -1,4 +1,4 @@
-export const source_words_str: string =
+const source_words_str: string =
     'the name of very to through and just form in much is great it think you say ' +
     'that help he low was line for before on turn are cause with same as mean ' +
     'differ his move they right be boy at old one too have does this tell from ' +
@@ -41,10 +41,9 @@ export const source_words: Array<string> = source_words_str.split(' ');
 
 // not sure which of these two I'll actually want
 export function random_word() {
-    return source_words[random_index()];
-}
-
-export function random_index() {
-    const words_len = source_words.length;
-    return Math.floor(Math.random() * words_len);
+    return source_words[
+        Math.floor(
+            Math.random() * source_words.length
+        )
+    ];
 }

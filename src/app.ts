@@ -1,5 +1,5 @@
 import { el, App, Mailbox } from './alm/alm';
-import * as words from './words';
+import { random_word } from './words';
 
 // space bar keycode: 32
 // backspace: 8
@@ -9,6 +9,7 @@ const words_box_mbox = new Mailbox(null);
 type Word = {
     expected: string;
     actual: string;
+    incorrect: boolean;
 };
 
 type AppState = {
@@ -29,16 +30,16 @@ enum Actions {
 };
 
 type Action = {
-    'type': string;
+    'type': Actions;
     data?: any;
-}
+};
 
 function generate_line(box_width, char_width) {
     const uw = [];
     let current_width = 0;
     let done: boolean = false;
     while (!done) {
-        let word = words.random_word();
+        let word = random_word();
         current_width += word.length * char_width + char_width;
         if (current_width >= box_width) {
             done = true;
@@ -46,7 +47,8 @@ function generate_line(box_width, char_width) {
         } else {
             uw.push({
                 expected: word,
-                actual: ''
+                actual: '',
+                incorrect: false
             });
         }
     }
@@ -54,7 +56,6 @@ function generate_line(box_width, char_width) {
 }
 
 function empty_model(): AppState {
-
     return {
         initialized: false,
         typed_so_far: '',
@@ -101,6 +102,10 @@ function update_model(action: Action, model: AppState): AppState {
             const current_word =
                 model.lines[model.current_line][model.current_word];
             current_word.actual = model.typed_so_far.replace(/\s+$/, '');
+
+            current_word.incorrect = current_word.expected !==
+                current_word.actual;
+
             model.current_word++;
 
             if (model.current_word >= model.lines[model.current_line].length) {
@@ -137,6 +142,7 @@ function update_model(action: Action, model: AppState): AppState {
             model.typed_so_far =
                 model.lines[model.current_line][model.current_word].actual;
         }
+
         return model;
     };
 
@@ -152,6 +158,9 @@ function render_line(line, current_word = null) {
             };
             if (idx !== null && idx === current_word) {
                 attrs['class'] = attrs['class'] + ' current-word';
+            }
+            if (uw.incorrect) {
+                attrs['class'] = attrs['class'] + ' incorrect';
             }
             return el('span', attrs, [uw.expected]);
         });
@@ -183,13 +192,17 @@ function render_model(model) {
             }, rendered_line));
         }
     } else {
+        // put a single line and a single character for the purposes of
+        // calculating the width of the lines and the characters
         words_line.push(el('span', {
             'class': 'word',
             'id': 'current-word'
         }, ['foo']));
     }
     return el('div', { 'id': 'typing-app' }, [
-        el('div', { 'id': 'words-box' }, words_line).subscribe(words_box_mbox),
+        el('div', { 'id': 'words-box-outer' }, [
+            el('div', { 'id': 'words-box' }, words_line)
+                .subscribe(words_box_mbox)]),
         el('div', { 'id': 'input-wrapper' }, [
             el('input', {
                 'type': 'text',
