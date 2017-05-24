@@ -15,8 +15,9 @@ type WordResult = {
 type AppState = {
     initialized: boolean;
     typed_so_far: string;
-    upcoming_words: Array<string>;
+    lines: Array<Array<string>>;
     current_word: number; // index into the upcoming words (current line)
+    current_line: number;
     words_box_width: number; // width of the words box (computed)
     char_width: number; // width of a character (computed)
     words_typed: number;
@@ -55,8 +56,9 @@ function empty_model(): AppState {
     return {
         initialized: false,
         typed_so_far: '',
-        upcoming_words: [],
+        lines: [],
         current_word: 0,
+        current_line: 0,
         words_box_width: 0,
         char_width: 0,
         words_typed: 0
@@ -73,8 +75,13 @@ function update_model(action: Action, model: AppState): AppState {
             model.words_box_width = action.data.offsetWidth;
             model.char_width = document.getElementById('current-word').offsetWidth /
                 3;
-            model.upcoming_words = generate_line(model.words_box_width,
-                model.char_width);
+            for (let i = 0; i < 3; i++) {
+                let line = generate_line(
+                    model.words_box_width,
+                    model.char_width
+                );
+                model.lines.push(line);
+            }
             model.initialized = true;
         }
         return model;
@@ -91,13 +98,14 @@ function update_model(action: Action, model: AppState): AppState {
 
             model.current_word++;
 
-            if (model.current_word >= model.upcoming_words.length) {
-                model.upcoming_words = generate_line(
+            if (model.current_word >= model.lines[model.current_line].length) {
+                let next_line = generate_line(
                     model.words_box_width,
                     model.char_width
                 );
+                model.lines.push(next_line);
                 model.current_word = 0;
-                console.log('new line', model.upcoming_words);
+                model.current_line++;
             }
             model.typed_so_far = '';
             model.words_typed++;
@@ -124,7 +132,7 @@ function update_model(action: Action, model: AppState): AppState {
 
 function render_line(line, current_word = null) {
 
-    const upcoming_words_spans: Array<any> = line.map(
+    const line_spans: Array<any> = line.map(
         (uw, idx) => {
             let attrs = { 'class': 'word', 'key': 'word-' + uw };
             if (idx !== null && idx === current_word) {
@@ -133,22 +141,41 @@ function render_line(line, current_word = null) {
             return el('span', attrs, [uw]);
         });
 
-    return upcoming_words_spans;
+    return line_spans;
 }
 
 function render_model(model) {
     let words_line = [];
 
     if (model.initialized) {
-        words_line = render_line(model.upcoming_words, model.current_word);
+        let start_index = model.current_line === 0
+            ? 0
+            : model.current_line - 1;
+        let end_index = model.current_line === 0
+            ? 2
+            : model.current_line + 1;
 
+        for (let i = start_index; i <= end_index; i++) {
+            let line = model.lines[i];
+            let rendered_line = render_line(
+                line,
+                model.current_line === i
+                    ? model.current_word
+                    : null
+            );
+            words_line.push(el('div', {
+                'class': 'line',
+                'id': 'line-' + i.toString()
+            }, rendered_line));
+        }
     } else {
-        words_line.push('foo');
+        words_line.push(el('span', {
+            'class': 'word',
+            'id': 'current-word'
+        }, ['foo']));
     }
     return el('div', { 'id': 'typing-app' }, [
-        el('div', { 'id': 'words-box' }, [
-            el('span', { 'id': 'current-word' }, words_line)
-        ]).subscribe(words_box_mbox),
+        el('div', { 'id': 'words-box' }, words_line).subscribe(words_box_mbox),
         el('div', { 'id': 'input-wrapper' }, [
             el('input', {
                 'type': 'text',
