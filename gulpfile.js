@@ -78,11 +78,10 @@ gulp.task('serve', serve({
     root: ['./'],
     middleware: function(req, res, next) {
         if (req.url.startsWith('/dist')) {
+            console.log('rerouting', req.url);
             var endpoint = req.url.slice(5);
-            console.log('asking for', req.url);
             res.statusCode = 302;
             res.setHeader('Location', '/static' + endpoint);
-            res.end();
         }
         next();
     }
