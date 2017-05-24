@@ -29,6 +29,8 @@ gulp.task('make-app', function() {
 
 // building on the previous two tasks create a javascript bundle
 gulp.task('make', ['alm', 'make-app'], function() {
+
+
     return gulp.src('./tmp/app.js')
         .pipe(gulpWebpack({
             output: {
@@ -55,7 +57,11 @@ gulp.task('dist', ['make'], function() {
                 new webpack.optimize.UglifyJsPlugin()
             ]
         }))
-        .pipe(gulp.dest('./dist'));
+        .pipe(gulp.dest('./dist/js'));
+
+    gulp.src('./static/css/*')
+        .pipe(gulp.dest('./dist/css'));
+
 });
 
 // delete all but the necessary source files
@@ -68,4 +74,16 @@ gulp.task('clean', function() {
         ]);
 });
 
-gulp.task('serve', serve('./'));
+gulp.task('serve', serve({
+    root: ['./'],
+    middleware: function(req, res, next) {
+        if (req.url.startsWith('/dist')) {
+            var endpoint = req.url.slice(5);
+            console.log('asking for', req.url);
+            res.statusCode = 302;
+            res.setHeader('Location', '/static' + endpoint);
+            res.end();
+        }
+        next();
+    }
+}));
