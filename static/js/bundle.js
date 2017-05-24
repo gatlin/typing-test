@@ -136,6 +136,10 @@
 	                    current_word.incorrect = true;
 	                }
 	                else {
+	                    if (current_word.incorrect) {
+	                        // we went back and fixed one
+	                        model.num_words_incorrect--;
+	                    }
 	                    current_word.incorrect = false;
 	                }
 	                model.current_word++;
