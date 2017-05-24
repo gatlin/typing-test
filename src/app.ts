@@ -5,6 +5,7 @@ import * as words from './words';
 // backspace: 8
 
 const words_box_mbox = new Mailbox(null);
+const input_mbox = new Mailbox(null);
 
 type WordResult = {
     expected: string;
@@ -211,6 +212,12 @@ function main(scope) {
             data: elem
         }))
         .connect(scope.actions);
+
+    input_mbox
+        .filter(elem => elem !== null)
+        .recv(elem => {
+            elem.focus();
+        });
 }
 
 const app = new App({
