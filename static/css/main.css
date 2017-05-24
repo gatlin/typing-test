@@ -1,3 +1,20 @@
+div#some-text {
+    margin: 10px auto;
+    text-align: center;
+}
+
+div#some-text.begun {
+    animation: fadeout 2s;
+    -moz-animation: fadeout 2s;
+    -webkit-animation: fadeout 2s;
+    -o-animation: fadeout 2s;
+    opacity: 0;
+}
+
+div#some-text p {
+    font-family: sans-serif;
+}
+
 footer {
     text-align: center;
     margin: 20px;
@@ -75,6 +92,7 @@ div#below-box.fade-in {
     -o-animation: fadein 2s;
 }
 
+/** FADE IN */
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 1; }
@@ -102,4 +120,34 @@ div#below-box.fade-in {
 @-o-keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 1; }
+}
+
+/** FADE OUT */
+@keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* Opera < 12.1 */
+@-o-keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
 }

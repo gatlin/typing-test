@@ -25,6 +25,7 @@ type AppState = {
     active: boolean;
     finished: boolean;
     cpm: number;
+    num_words_incorrect: number;
 };
 
 enum Actions {
@@ -72,7 +73,8 @@ function empty_model(): AppState {
         words_typed: 0,
         active: false,
         finished: false,
-        cpm: 0
+        cpm: 0,
+        num_words_incorrect: 0
     };
 }
 
@@ -121,8 +123,13 @@ function update_model(action: Action, model: AppState): AppState {
                 model.lines[model.current_line][model.current_word];
             current_word.actual = model.typed_so_far.replace(/\s+$/, '');
 
-            current_word.incorrect = current_word.expected !==
-                current_word.actual;
+            if (current_word.expected !== current_word.actual) {
+                model.num_words_incorrect++;
+                current_word.incorrect = true;
+            }
+            else {
+                current_word.incorrect = false;
+            }
 
             model.current_word++;
 
@@ -179,6 +186,8 @@ function update_model(action: Action, model: AppState): AppState {
             for (let i = 0; i < words.length; i++) {
                 model.cpm += words[i].expected.length;
             }
+
+            model.cpm += words.length; // spaces
         }
         return model;
     };
@@ -246,15 +255,31 @@ function render_model(model) {
                 'type': 'text',
                 'id': 'typing-input',
                 'key': 'typing-input',
+                'autofocus': 'autofocus',
                 'value': model.typed_so_far
-            }, [])
+            }, []),
+            el('div', {
+                'id': 'some-text',
+                'class': model.active ? 'begun' : ''
+            }, [
+                    el('p', {}, ['Just start typing to begin.'])
+                ])
         ])
+
     } else {
+        const text = [el('p', {}, [
+            'Refresh to try again, maybe after a two minute break.'])];
+
+        if (model.num_words_incorrect > 0) {
+            text.unshift(el('p', {}, ['It would have been higher, but you got ' +
+                model.num_words_incorrect + ' words incorrect.']));
+        }
+
         below_box = el('div', { 'id': 'below-box', 'class': 'fade-in' }, [
             el('h2', { 'id': 'score' }, [
                 'You typed ' + model.cpm + ' characters per minute!'
             ]),
-            el('p', {}, ['Refresh to try again, maybe after a two minute break.'])
+            el('span', {}, text)
         ]);
     }
 
