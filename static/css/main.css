@@ -34,6 +34,7 @@ div#words-box-outer {
     padding: 0 10px;
     border: 1px solid #b9b9b9;
     width: 50%;
+    border-radius: 5px;
 }
 
 div#words-box {
