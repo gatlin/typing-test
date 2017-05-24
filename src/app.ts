@@ -275,8 +275,9 @@ function render_model(model) {
             'Refresh to try again, maybe after a two minute break.'])];
 
         if (model.num_words_incorrect > 0) {
+            let plural = model.num_words_incorrect > 1 ? ' words' : ' word';
             text.unshift(el('p', {}, ['It would have been higher, but you got ' +
-                model.num_words_incorrect + ' words incorrect.']));
+                model.num_words_incorrect + plural + ' incorrect.']));
         }
 
         below_box = el('div', { 'id': 'below-box', 'class': 'fade-in' }, [
