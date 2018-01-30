@@ -19,8 +19,7 @@ const MainComponent = props => (
         >
         <WordBox lines={props.lines} />
       </div>
-      <BelowBox
-        />
+      <BelowBox />
     </section>
 );
 
