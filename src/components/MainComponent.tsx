@@ -1,6 +1,5 @@
 import * as Alm from 'alm';
 
-import './MainComponent.css';
 import BelowBox from '../views/BelowBox';
 import WordBox from '../views/WordBox';
 

@@ -1,5 +1,9 @@
 import * as Alm from 'alm';
 
+/**
+ * Determines if the given values indicate the current word.
+ * The logic is just ugly enough that it has been defined here for legibility.
+ */
 function currentWord({ line_idx, word_idx, current_word, current_line }) {
     const line_check = current_line === 0
           ? line_idx === 0
@@ -7,6 +11,9 @@ function currentWord({ line_idx, word_idx, current_word, current_line }) {
     return line_check && (word_idx === current_word);
 }
 
+/**
+ * Component for a word rendered in the {@link WordBox}.
+ */
 const Word = props => {
     const { expected, actual, incorrect } = props.word;
     let outerClassName = 'word';
@@ -36,6 +43,9 @@ const Word = props => {
     );
 };
 
+/**
+ * One line of {@link Word}s in the {@link WordBox}.
+ */
 const Line = ({
     lines,
     current_word,
@@ -59,6 +69,10 @@ const Line = ({
     </div>
 );
 
+/**
+ * Displays the words for the test. With one exception this component keeps the
+ * current line in the second position.
+ */
 const WordBox = ({ lines, current_word, current_line, typed_so_far }) => {
     const line_start = current_line === 0
           ? 0

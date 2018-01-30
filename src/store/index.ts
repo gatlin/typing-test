@@ -3,12 +3,19 @@
  * The state types as well as the initial application state.
  */
 
+/**
+ * Contains the expected vs actual word typed. For convenience it also
+ * track of whether the word was correct.
+ */
 export type Word = {
     expected: string;
     actual: string;
     incorrect: boolean;
 };
 
+/**
+ * The actual application state type.
+ */
 export type State = {
     initialized: boolean;
     typed_so_far: string;
@@ -24,6 +31,9 @@ export type State = {
     num_words_incorrect: number;
 }
 
+/**
+ * The initial state when the application first starts.
+ */
 export const initialState: State = {
     initialized: false,
     typed_so_far: '',

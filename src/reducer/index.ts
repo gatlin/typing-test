@@ -4,13 +4,19 @@
  */
 import { Reducer } from 'alm';
 import { Actions } from '../actions';
-import { source_words, random_word } from '../words';
-import { Word, State } from '../store';
+import { random_word } from '../words';
+import { State } from '../store';
 
+/**
+ * Used in the reducer. Defined separately for legibility.
+*/
 function flatten_array<T>(ary: Array<Array<T>>): Array<T> {
     return ary.reduce((a, b) => [...a, ...b], []);
 }
 
+/**
+ * Generates a line for the box using {@link random_word }.
+ */
 function generate_line(box_width, char_width = 20) {
     const uw = [];
     let current_width = 0;
@@ -32,6 +38,9 @@ function generate_line(box_width, char_width = 20) {
     return uw;
 }
 
+/**
+ * The actual reducer.
+ */
 const reducer: Reducer<State, Actions> = (state, action) => {
     let {
         initialized,
@@ -47,6 +56,7 @@ const reducer: Reducer<State, Actions> = (state, action) => {
         cpm,
         num_words_incorrect
     } = state;
+
     switch (action.type) {
         case Actions.Init: {
             if (initialized) {
@@ -137,7 +147,7 @@ const reducer: Reducer<State, Actions> = (state, action) => {
                 active = false;
                 const words = flatten_array(lines)
                     .slice(0, words_typed)
-                    .filter((word: Word) => !word.incorrect);
+                    .filter(word => !word.incorrect);
                 cpm = 0;
                 for (let i = 0; i < words.length; i++) {
                     cpm += words[i].expected.length;

@@ -1,5 +1,8 @@
 import * as Alm from 'alm';
 
+/**
+ * The component to render before the test has begun.
+ */
 const BelowBoxInitial = props => (
     <div>
       <input
@@ -37,6 +40,9 @@ const BelowBoxInitial = props => (
     </div>
 );
 
+/**
+ * The component to render when the test is finished.
+ */
 const BelowBoxFinished = props => (
     <div className='fade-in'>
       <h2 id='score'>
@@ -53,6 +59,9 @@ const BelowBoxFinished = props => (
     </div>
 );
 
+/**
+ * The component below the word box.
+ */
 const BelowBox = props => {
     const belowBox = props.finished
           ? BelowBoxFinished(props)
