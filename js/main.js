@@ -331,17 +331,10 @@ var Actions;
     Actions[Actions["Stop"] = 4] = "Stop";
 })(Actions = exports.Actions || (exports.Actions = {}));
 ;
-exports.initialize = function (data) { return function (dispatch, getState) {
-    window.setTimeout(function () {
-        dispatch({
-            type: Actions.Stop
-        });
-    }, 60000);
-    return ({
-        type: Actions.Init,
-        data: data
-    });
-}; };
+exports.initialize = function (data) { return ({
+    type: Actions.Init,
+    data: data
+}); };
 exports.keyPress = function (data) { return ({
     type: Actions.KeyPress,
     data: data
@@ -363,6 +356,7 @@ exports.nextWord = function () { return ({
 Object.defineProperty(exports, "__esModule", { value: true });
 var alm_1 = __webpack_require__(0);
 var store_1 = __webpack_require__(4);
+var actions_1 = __webpack_require__(1);
 var MainView_1 = __webpack_require__(5);
 var reducer_1 = __webpack_require__(11);
 var app = new alm_1.Alm({
@@ -373,6 +367,14 @@ var app = new alm_1.Alm({
     eventRoot: 'main'
 });
 app.store.subscribe(function () {
+    var do_set_timer = app.store.getState().do_set_timer;
+    if (do_set_timer) {
+        window.setTimeout(function () {
+            app.store.dispatch({
+                type: actions_1.Actions.Stop
+            });
+        }, 60000);
+    }
 });
 document.title = 'Typing Test';
 app.start();
@@ -594,7 +596,8 @@ exports.initialState = {
     active: false,
     finished: false,
     cpm: 0,
-    num_words_incorrect: 0
+    num_words_incorrect: 0,
+    do_set_timer: false
 };
 
 
@@ -853,7 +856,7 @@ function generate_line(box_width, char_width) {
     return uw;
 }
 var reducer = function (state, action) {
-    var initialized = state.initialized, typed_so_far = state.typed_so_far, lines = state.lines, current_word = state.current_word, current_line = state.current_line, words_box_width = state.words_box_width, char_width = state.char_width, words_typed = state.words_typed, active = state.active, finished = state.finished, cpm = state.cpm, num_words_incorrect = state.num_words_incorrect;
+    var initialized = state.initialized, typed_so_far = state.typed_so_far, lines = state.lines, current_word = state.current_word, current_line = state.current_line, words_box_width = state.words_box_width, char_width = state.char_width, words_typed = state.words_typed, active = state.active, finished = state.finished, cpm = state.cpm, num_words_incorrect = state.num_words_incorrect, do_set_timer = state.do_set_timer;
     switch (action.type) {
         case actions_1.Actions.Init: {
             if (initialized) {
@@ -869,6 +872,7 @@ var reducer = function (state, action) {
             break;
         }
         case actions_1.Actions.GoBack: {
+            active = !finished;
             if ('' === typed_so_far &&
                 words_typed > 0) {
                 current_word--;
@@ -917,6 +921,7 @@ var reducer = function (state, action) {
         }
         case actions_1.Actions.KeyPress: {
             var charCode = action.data.charCode;
+            active = true;
             typed_so_far += String.fromCharCode(charCode);
             var the_word = lines[current_line][current_word];
             the_word.actual = typed_so_far.replace(/\s+/g, '');
@@ -941,6 +946,7 @@ var reducer = function (state, action) {
         default:
             return __assign({}, state);
     }
+    do_set_timer = initialized && !state.active && active;
     return __assign({}, state, { initialized: initialized,
         typed_so_far: typed_so_far,
         lines: lines,
@@ -952,7 +958,8 @@ var reducer = function (state, action) {
         active: active,
         finished: finished,
         cpm: cpm,
-        num_words_incorrect: num_words_incorrect });
+        num_words_incorrect: num_words_incorrect,
+        do_set_timer: do_set_timer });
 };
 exports.default = reducer;
 

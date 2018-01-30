@@ -29,6 +29,7 @@ export type State = {
     finished: boolean;
     cpm: number;
     num_words_incorrect: number;
+    do_set_timer: boolean;
 }
 
 /**
@@ -46,5 +47,6 @@ export const initialState: State = {
     active: false,
     finished: false,
     cpm: 0,
-    num_words_incorrect: 0
+    num_words_incorrect: 0,
+    do_set_timer: false
 };

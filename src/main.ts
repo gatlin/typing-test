@@ -14,8 +14,16 @@ const app = new Alm<State, Actions>({
     eventRoot: 'main'
 });
 
+// Set the test timer when it's time.
 app.store.subscribe(() => {
-    //console.log(app.store.getState());
+    const { do_set_timer } = app.store.getState();
+    if (do_set_timer) {
+        window.setTimeout(() => {
+            app.store.dispatch({
+                type: Actions.Stop
+            });
+        }, 60000);
+    }
 });
 
 // We should set the document title.

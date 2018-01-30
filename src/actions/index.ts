@@ -12,17 +12,10 @@ export enum Actions {
     Stop
 };
 
-export const initialize = data => (dispatch, getState) => {
-    window.setTimeout(() => {
-        dispatch({
-            type: Actions.Stop
-        });
-    }, 60000);
-    return ({
-        type: Actions.Init,
-        data
-    });
-};
+export const initialize = data => ({
+    type: Actions.Init,
+    data
+});
 
 export const keyPress = data => ({
     type: Actions.KeyPress,

@@ -54,7 +54,8 @@ const reducer: Reducer<State, Actions> = (state, action) => {
         active,
         finished,
         cpm,
-        num_words_incorrect
+        num_words_incorrect,
+        do_set_timer
     } = state;
 
     switch (action.type) {
@@ -76,7 +77,7 @@ const reducer: Reducer<State, Actions> = (state, action) => {
         }
 
         case Actions.GoBack: {
-
+            active = !finished;
             // case 1: we're trying to go back the previous word
             if ('' === typed_so_far &&
                 words_typed > 0) {
@@ -134,6 +135,7 @@ const reducer: Reducer<State, Actions> = (state, action) => {
 
         case Actions.KeyPress: {
             const { charCode } = action.data;
+            active = true;
             typed_so_far += String.fromCharCode(charCode);
             const the_word = lines[current_line][current_word];
             the_word.actual = typed_so_far.replace(/\s+/g, '');
@@ -159,6 +161,9 @@ const reducer: Reducer<State, Actions> = (state, action) => {
         default:
             return { ...state };
     }
+
+    do_set_timer = initialized && !state.active && active;
+
     return {
         ...state,
         initialized,
@@ -172,7 +177,8 @@ const reducer: Reducer<State, Actions> = (state, action) => {
         active,
         finished,
         cpm,
-        num_words_incorrect
+        num_words_incorrect,
+        do_set_timer
     };
 };
 
