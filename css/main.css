@@ -1,3 +1,7 @@
+html,body {
+    margin: 0;
+    padding: 0;
+}
 div#some-text {
     margin: 10px auto;
     text-align: center;
@@ -30,6 +34,7 @@ div#typing-app {
 }
 
 div#words-box-outer {
+    display: block;
     margin: 25px auto;
     padding: 0 10px;
     border: 1px solid #b9b9b9;
@@ -65,15 +70,24 @@ input#typing-input {
     height: 2.0em;
 }
 
-span.word:after {
-    content: " ";
+.word {
+    padding: 0 10px;
+    text-align: center;
 }
 
-span.word.current-word {
+.current-word {
+    border-bottom: 2px solid #87f056;
+}
+
+.bolded {
     font-weight: bold;
 }
 
-span.word.incorrect {
+.current-line {
+    border: 1px solid #ececec;
+}
+
+.incorrect {
     color: red;
 }
 
@@ -83,9 +97,9 @@ h2#score {
 }
 
 /*
-credit where it is due:
-https://stackoverflow.com/questions/11679567/using-css-for-fade-in-effect-on-page-load
-*/
+   credit where it is due:
+   https://stackoverflow.com/questions/11679567/using-css-for-fade-in-effect-on-page-load
+ */
 div#below-box.fade-in {
     animation: fadein 2s;
     -moz-animation: fadein 2s;

@@ -1,6 +1,6 @@
 # typing test
 
-by [gatlin](http://niltag.net), (c) 2017.
+by [gatlin](http://niltag.net), (c) 2017-2018.
 
 # what?
 
