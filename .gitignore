@@ -56,7 +56,7 @@ jspm_packages
 data
 
 .AppleDouble
-js/*
+
 tmp/
 init.sh
 package.json.sample
