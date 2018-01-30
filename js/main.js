@@ -1254,7 +1254,7 @@ exports.default = BelowBoxView;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Alm = __webpack_require__(0);
-var BelowBoxInitial = function (props) { return (Alm.el("div", { id: 'below-box' },
+var BelowBoxInitial = function (props) { return (Alm.el("div", null,
     Alm.el("input", { type: 'text', id: 'typing-input', key: null, autoFocus: true, on: {
             keypress: function (evt) {
                 var _a = evt.getRaw(), keyCode = _a.keyCode, charCode = _a.charCode;
@@ -1272,8 +1272,8 @@ var BelowBoxInitial = function (props) { return (Alm.el("div", { id: 'below-box'
             }
         }, value: props.typed_so_far }),
     Alm.el("div", { key: 'huh', id: 'some-text', className: props.active ? 'begun' : '' },
-        Alm.el("p", null, "Just start typing to begin!")))); };
-var BelowBoxFinished = function (props) { return (Alm.el("div", { id: 'below-box', className: 'fade-in' },
+        Alm.el("p", null, "Just start typing to begin! You have 1 minute.")))); };
+var BelowBoxFinished = function (props) { return (Alm.el("div", { className: 'fade-in' },
     Alm.el("h2", { id: 'score' },
         "You typed ",
         props.cpm.toString(),
@@ -1284,14 +1284,19 @@ var BelowBoxFinished = function (props) { return (Alm.el("div", { id: 'below-box
             props.num_words_incorrect.toString(),
             " words wrong."))
         : null,
-    Alm.el("p", null, "Refresh to try again. Maybe take a two minute break."))); };
+    Alm.el("p", null, "Refresh to try again. Maybe take a 2 minute break."))); };
 var BelowBox = function (props) {
-    switch (props.finished) {
-        case true:
-            return BelowBoxFinished(props);
-        default:
-            return BelowBoxInitial(props);
-    }
+    var belowBox = props.finished
+        ? BelowBoxFinished(props)
+        : BelowBoxInitial(props);
+    return (Alm.el("div", { id: 'below-box' },
+        belowBox,
+        Alm.el("p", null,
+            " Made by ",
+            Alm.el("a", { href: "http://niltag.net" }, "Gatlin"),
+            " (",
+            Alm.el("a", { href: "https://github.com/gatlin/typing-test" }, "source code"),
+            ").")));
 };
 exports.default = BelowBox;
 

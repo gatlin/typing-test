@@ -1,7 +1,7 @@
 import * as Alm from 'alm';
 
 const BelowBoxInitial = props => (
-    <div id='below-box'>
+    <div>
       <input
         type='text'
         id='typing-input'
@@ -31,14 +31,14 @@ const BelowBoxInitial = props => (
           id='some-text'
           className={ props.active ? 'begun' : '' }>
         <p>
-          Just start typing to begin!
+          Just start typing to begin! You have 1 minute.
         </p>
       </div>
     </div>
 );
 
 const BelowBoxFinished = props => (
-    <div id='below-box' className='fade-in'>
+    <div className='fade-in'>
       <h2 id='score'>
         You typed { props.cpm.toString() } characters per minute!
       </h2>
@@ -46,19 +46,27 @@ const BelowBoxFinished = props => (
           ? (<p>The number would have been higher but you got {
               props.num_words_incorrect.toString() } words wrong.</p>)
         : null}
-      <p>
-        Refresh to try again. Maybe take a two minute break.
-      </p>
+        <p>
+        Refresh to try again. Maybe take a 2 minute break.
+        </p>
+
     </div>
 );
 
 const BelowBox = props => {
-    switch (props.finished) {
-    case true:
-        return BelowBoxFinished(props);
-    default:
-        return BelowBoxInitial(props);
-    }
+    const belowBox = props.finished
+          ? BelowBoxFinished(props)
+          : BelowBoxInitial(props);
+    return (
+        <div id='below-box'>
+          { belowBox }
+          <p> Made by <a href="http://niltag.net">Gatlin</a> (
+            <a href="https://github.com/gatlin/typing-test">
+              source code
+            </a>).
+          </p>
+        </div>
+    );
 };
 
 export default BelowBox;
