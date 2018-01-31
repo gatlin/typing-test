@@ -47,7 +47,6 @@ const Word = props => {
  * One line of {@link Word}s in the {@link WordBox}.
  */
 const Line = ({
-    lines,
     current_word,
     current_line,
     words,
@@ -56,7 +55,7 @@ const Line = ({
 }) => (
     <div
       className='line'
-      key={line_idx}
+      key={current_line}
       >
       { words.map((word, word_idx) => Word({
           word,
@@ -84,7 +83,6 @@ const WordBox = ({ lines, current_word, current_line, typed_so_far }) => {
               .slice(line_start, line_end)
               .map((words, line_idx) =>
                    Line({
-                       lines,
                        current_word,
                        current_line,
                        words,

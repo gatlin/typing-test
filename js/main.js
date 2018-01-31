@@ -123,6 +123,10 @@ var Store = (function () {
     return Store;
 }());
 exports.Store = Store;
+;
+function flatten(ary) {
+    return ary.reduce(function (a, b) { return a.concat(b); }, []);
+}
 function el(ctor, props) {
     if (props === void 0) { props = {}; }
     var _children = [];
@@ -151,7 +155,7 @@ function el(ctor, props) {
             ? _children
                 .filter(function (child) { return typeof child !== 'undefined'; })
                 .map(function (child, idx) {
-                if (!child) {
+                if (!child || child instanceof Array) {
                     return null;
                 }
                 return typeof child === 'string'
@@ -167,6 +171,7 @@ function el(ctor, props) {
                 attrs: props
             }, children, vdom_1.VDomType.Node, handler)
             : ctor(__assign({}, props, { children: children }))(ctx);
+        console.log('view', view);
         return view;
     };
 }
@@ -221,7 +226,19 @@ var AlmEvent = (function () {
 exports.AlmEvent = AlmEvent;
 var Alm = (function () {
     function Alm(cfg) {
+        var _this = this;
         this.gensymnumber = 0;
+        this.handleEvent = function (evt) {
+            var evtName = evt.type;
+            if (_this.events[evtName]) {
+                if (evt.target.hasAttribute('data-alm-id')) {
+                    var almId = evt.target.getAttribute('data-alm-id');
+                    if (_this.events[evtName][almId]) {
+                        _this.events[evtName][almId](new AlmEvent(evt));
+                    }
+                }
+            }
+        };
         this.store = new Store(cfg.model, cfg.update);
         this.eventRoot = typeof cfg.eventRoot === 'string'
             ? document.getElementById(cfg.eventRoot)
@@ -275,22 +292,11 @@ var Alm = (function () {
             vtree = updated;
         });
     };
-    Alm.prototype.handleEvent = function (evt) {
-        var evtName = evt.type;
-        if (this.events[evtName]) {
-            if (evt.target.hasAttribute('data-alm-id')) {
-                var almId = evt.target.getAttribute('data-alm-id');
-                if (this.events[evtName][almId]) {
-                    this.events[evtName][almId](new AlmEvent(evt));
-                }
-            }
-        }
-    };
     Alm.prototype.gensym = function () {
         return 'node-' + (this.gensymnumber++).toString();
     };
     Alm.prototype.registerEvent = function (evtName, cb) {
-        this.eventRoot.addEventListener(evtName, cb.bind(this), true);
+        this.eventRoot.addEventListener(evtName, cb, true);
     };
     return Alm;
 }());
@@ -464,7 +470,7 @@ var Op;
     Op[Op["Merge"] = 0] = "Merge";
     Op[Op["Delete"] = 1] = "Delete";
     Op[Op["Insert"] = 2] = "Insert";
-})(Op || (Op = {}));
+})(Op = exports.Op || (exports.Op = {}));
 ;
 function diff_array(a, b, eq) {
     if (!a.length) {
@@ -489,13 +495,13 @@ function diff_array(a, b, eq) {
                 d[i_2 * n + j_2] = d[(i_2 - 1) * n + (j_2 - 1)];
             }
             else {
-                d[i_2 * n + j_2] = Math.min(d[(i_2 - 1) * n + j_2], d[i_2 * n + (j_2 - 1)])
-                    + 1;
+                d[i_2 * n + j_2] = Math.min(d[(i_2 - 1) * n + j_2], d[i_2 * n + (j_2 - 1)]) + 1;
             }
         }
     }
-    var i = m - 1, j = n - 1;
-    while (!(i === 0 && j === 0)) {
+    var i = m - 1;
+    var j = n - 1;
+    while (i > 0 && j > 0) {
         if (eq(a[i - 1], b[j - 1])) {
             i--;
             j--;
@@ -512,16 +518,28 @@ function diff_array(a, b, eq) {
             }
         }
     }
+    if (i > 0 && j === 0) {
+        for (; i >= 0; i--) {
+            moves.unshift([Op.Delete, a[i], null]);
+        }
+    }
+    if (j > 0 && i === 0) {
+        for (; j >= 0; j--) {
+            moves.unshift([Op.Insert, null, b[j]]);
+        }
+    }
     return moves;
 }
 exports.diff_array = diff_array;
 function diff_dom(parent, a, b, index) {
     if (index === void 0) { index = 0; }
     if (typeof b === 'undefined' || b === null) {
-        if (parent.childNodes[index].onDestroy) {
-            parent.childNodes[index].onDestroy();
+        if (parent.childNodes[index]) {
+            if (parent.childNodes[index].onDestroy) {
+                parent.childNodes[index].onDestroy();
+            }
+            parent.removeChild(parent.childNodes[index]);
         }
-        parent.removeChild(parent.childNodes[index]);
         return;
     }
     if (typeof a === 'undefined' || a === null) {
@@ -781,8 +799,8 @@ var Word = function (props) {
         Alm.el("span", null, unbolded)));
 };
 var Line = function (_a) {
-    var lines = _a.lines, current_word = _a.current_word, current_line = _a.current_line, words = _a.words, line_idx = _a.line_idx, typed_so_far = _a.typed_so_far;
-    return (Alm.el("div", { className: 'line', key: line_idx }, words.map(function (word, word_idx) { return Word({
+    var current_word = _a.current_word, current_line = _a.current_line, words = _a.words, line_idx = _a.line_idx, typed_so_far = _a.typed_so_far;
+    return (Alm.el("div", { className: 'line', key: current_line }, words.map(function (word, word_idx) { return Word({
         word: word,
         line_idx: line_idx,
         word_idx: word_idx,
@@ -801,7 +819,6 @@ var WordBox = function (_a) {
         .slice(line_start, line_end)
         .map(function (words, line_idx) {
         return Line({
-            lines: lines,
             current_word: current_word,
             current_line: current_line,
             words: words,
