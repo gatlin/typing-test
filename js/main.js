@@ -171,7 +171,6 @@ function el(ctor, props) {
                 attrs: props
             }, children, vdom_1.VDomType.Node, handler)
             : ctor(__assign({}, props, { children: children }))(ctx);
-        console.log('view', view);
         return view;
     };
 }
@@ -648,12 +647,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Alm = __webpack_require__(0);
 var BelowBox_1 = __webpack_require__(7);
 var WordBox_1 = __webpack_require__(9);
-var MainComponent = function (props) { return (Alm.el("section", { id: "typing-app", className: "app" },
+var Footer = function () { return (Alm.el("footer", { key: 'footer' },
+    Alm.el("p", null,
+        "Made by ",
+        Alm.el("a", { href: "http://niltag.net" }, "Gatlin"),
+        " (",
+        Alm.el("a", { href: "https://github.com/gatlin/typing-test" }, "source code"),
+        ")."))); };
+var MainComponent = function (props) { return (Alm.el("div", { id: "typing-app", className: "app" },
     Alm.el("div", { id: 'words-box-outer', ref: function (e) {
             props.initialize(e.offsetWidth);
         } },
-        Alm.el(WordBox_1.default, { lines: props.lines })),
-    Alm.el(BelowBox_1.default, null))); };
+        Alm.el(WordBox_1.default, { lines: props.lines }),
+        Alm.el(BelowBox_1.default, null)),
+    Alm.el(Footer, null))); };
 exports.default = MainComponent;
 
 
@@ -716,25 +723,18 @@ var BelowBoxFinished = function (props) { return (Alm.el("div", { className: 'fa
         "You typed ",
         props.cpm.toString(),
         " characters per minute!"),
-    props.num_words_incorrect > 0
+    Alm.el("p", null, props.num_words_incorrect > 0
         ? (Alm.el("p", null,
             "The number would have been higher but you got ",
             props.num_words_incorrect.toString(),
             " words wrong."))
-        : null,
+        : null),
     Alm.el("p", null, "Refresh to try again. Maybe take a 2 minute break."))); };
 var BelowBox = function (props) {
     var belowBox = props.finished
         ? BelowBoxFinished(props)
         : BelowBoxInitial(props);
-    return (Alm.el("div", { id: 'below-box' },
-        belowBox,
-        Alm.el("p", null,
-            " Made by ",
-            Alm.el("a", { href: "http://niltag.net" }, "Gatlin"),
-            " (",
-            Alm.el("a", { href: "https://github.com/gatlin/typing-test" }, "source code"),
-            ").")));
+    return (Alm.el("div", { id: 'below-box' }, belowBox));
 };
 exports.default = BelowBox;
 

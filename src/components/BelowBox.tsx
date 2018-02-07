@@ -48,10 +48,12 @@ const BelowBoxFinished = props => (
       <h2 id='score'>
         You typed { props.cpm.toString() } characters per minute!
       </h2>
+      <p>
       { props.num_words_incorrect > 0
           ? (<p>The number would have been higher but you got {
               props.num_words_incorrect.toString() } words wrong.</p>)
         : null}
+    </p>
         <p>
         Refresh to try again. Maybe take a 2 minute break.
         </p>
@@ -69,11 +71,6 @@ const BelowBox = props => {
     return (
         <div id='below-box'>
           { belowBox }
-          <p> Made by <a href="http://niltag.net">Gatlin</a> (
-            <a href="https://github.com/gatlin/typing-test">
-              source code
-            </a>).
-          </p>
         </div>
     );
 };
